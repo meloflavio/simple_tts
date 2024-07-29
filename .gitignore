@@ -1,0 +1,7 @@
+output.mp3
+output.wav
+chunk.wav
+static/*.mp3
+static/*.wav
+
+.venv
