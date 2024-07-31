@@ -12,6 +12,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 # Set up Coqui TTS
 tts = TTS("tts_models/multilingual/multi-dataset/xtts_v2").to(device)
 
+
 @app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
@@ -76,4 +77,4 @@ def tts_synthesize():
 if __name__ == '__main__':
     if not os.path.exists('static'):
         os.makedirs('static')
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
