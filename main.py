@@ -4,6 +4,8 @@ import torch
 import os
 from TTS.utils.synthesizer import Synthesizer
 from pydub import AudioSegment
+import time
+import glob
 
 app = Flask(__name__)
 
@@ -44,6 +46,11 @@ def new_split_into_sentences(self, text):
 
     return sentences_without_dots
 
+def clean_old_audios(directory, keep=5):
+    files = glob.glob(os.path.join(directory, "*.mp3"))
+    files.sort(key=os.path.getctime, reverse=True)
+    for file in files[keep:]:
+        os.remove(file)
 
 Synthesizer.split_into_sentences = new_split_into_sentences
 
@@ -67,14 +74,18 @@ def tts_synthesize():
         combined_audio += chunk_audio
 
     # Save the combined audio to a file
-    output_path = os.path.join('static', 'output.mp3')
+    timestamp = int(time.time())
+    output_filename = f"output_{timestamp}.mp3"
+    output_path = os.path.join('static', output_filename)
     combined_audio.export(output_path, format="mp3")
 
-    audio_url = url_for('static', filename='output.mp3')
+    clean_old_audios('static', keep=5)
+
+    audio_url = url_for('static', filename=output_filename)
     return render_template('index.html', audio_url=audio_url)
 
 
 if __name__ == '__main__':
     if not os.path.exists('static'):
         os.makedirs('static')
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0', port=8001)
